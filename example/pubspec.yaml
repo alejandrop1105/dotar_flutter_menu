@@ -1,0 +1,19 @@
+name: dotar_flutter_menu_example
+description: The Dotar side menu in a minimal app.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dotar_flutter_menu:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

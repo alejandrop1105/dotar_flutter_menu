@@ -1,0 +1,42 @@
+name: dotar_flutter_menu
+description: >-
+  Dotar Soluciones' animated side menu, the company's signature in its Flutter
+  apps: the app slides and tilts aside to show the menu behind it.
+version: 0.1.0
+publish_to: none
+repository: https://github.com/alejandrop1105/dotar_flutter_menu
+
+environment:
+  sdk: ^3.11.0
+  flutter: ">=3.41.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  # A fake launcher platform for the signature's test.
+  plugin_platform_interface: ^2.1.8
+  url_launcher_platform_interface: ^2.3.2
+
+flutter:
+  # Plus Jakarta Sans (SIL Open Font License, fonts/OFL.txt), the weights the
+  # menu draws: bundled so the menu looks the same offline. An app reaches it
+  # as `packages/dotar_flutter_menu/PlusJakartaSans`; the menu's styles name
+  # the package, so no app declares it.
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: fonts/PlusJakartaSans-Regular.ttf
+        - asset: fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
