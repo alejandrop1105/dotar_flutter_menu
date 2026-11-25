@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- An item's label, the logout's and the mode switch's no longer overflow the 240 px column: one longer than the column holds goes on to a second line and reads whole. Labels that fit look as in 0.2.0. No API change.
+
 ## 0.2.0
 
 - `DotarMenuItem.selected`: the current screen's entry sits on a `brandColor`-tinted background and is announced as selected, without moving its icon or label. Works in `items` and `bottomItems`.

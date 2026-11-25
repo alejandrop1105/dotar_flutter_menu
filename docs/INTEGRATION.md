@@ -19,7 +19,7 @@ dependencies:
   dotar_flutter_menu:
     git:
       url: https://github.com/alejandrop1105/dotar_flutter_menu.git
-      ref: v0.2.0 # always a tag, never a branch
+      ref: v0.2.1 # always a tag, never a branch
 ```
 
 Run `flutter pub get` and commit `pubspec.lock`: it pins the exact commit. The package brings only `url_launcher` and its own font; the app declares no font and no asset for it.

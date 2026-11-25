@@ -15,7 +15,7 @@ dependencies:
   dotar_flutter_menu:
     git:
       url: https://github.com/alejandrop1105/dotar_flutter_menu.git
-      ref: v0.2.0
+      ref: v0.2.1
 ```
 
 It depends only on Flutter and `url_launcher`, and bundles Plus Jakarta Sans (SIL Open Font License, `fonts/OFL.txt`), so the menu looks the same offline and an app declares no font for it.
@@ -53,7 +53,7 @@ DotarMenuShell(
 ```
 
 - **Opening and closing.** Anything under the shell reaches the controller with `DotarMenuController.of(context)`: a hamburger button calls `toggle()`. `open()` and `close()` do nothing when the menu already is open or closed, so closing twice never reopens it.
-- **Items.** An item runs its `onTap` and then closes the menu; `visible: false` leaves it out. `bottomItems` are drawn compact at the bottom, under the mode switch.
+- **Items.** An item runs its `onTap` and then closes the menu; `visible: false` leaves it out. `bottomItems` are drawn compact at the bottom, under the mode switch. A label longer than the 240 px column holds, such as "Buscar actualización", goes on to a second line and reads whole instead of overflowing; so do the logout's and the mode switch's ("Modo oscuro").
 - **Selected item.** `selected: true` marks the entry of the screen the user is on: it sits on a `brandColor`-tinted background and screen readers announce it as selected; its icon and label do not move. The app works it out from its route, in `items` and in `bottomItems` alike:
 
   ```dart

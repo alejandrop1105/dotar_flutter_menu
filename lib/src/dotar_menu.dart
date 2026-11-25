@@ -279,12 +279,14 @@ class _DotarMenuState extends State<DotarMenu>
                             size: 18,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            widget.logoutLabel,
-                            style: _jakarta(
-                              color: Colors.redAccent.withValues(alpha: 0.7),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          Flexible(
+                            child: Text(
+                              widget.logoutLabel,
+                              style: _jakarta(
+                                color: Colors.redAccent.withValues(alpha: 0.7),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -515,7 +517,10 @@ class _DotarMenuState extends State<DotarMenu>
 
   /// One entry; the menu closes after its action. A selected one sits on a
   /// brand-tinted background inset 12 px, so its icon and label keep the
-  /// place they have unselected.
+  /// place they have unselected. A label longer than the column holds goes on
+  /// to a second line, read whole rather than cut (DEAM Preventa: "Buscar
+  /// actualización" overflowed by 17 px); the logout and the mode switch's
+  /// label do the same.
   Widget _buildItem(DotarMenuItem item, Color brand, {bool compact = false}) {
     Widget content = Padding(
       padding: EdgeInsets.symmetric(
@@ -526,12 +531,14 @@ class _DotarMenuState extends State<DotarMenu>
         children: [
           Icon(item.icon, color: Colors.white, size: 28),
           const SizedBox(width: 16),
-          Text(
-            item.label,
-            style: _jakarta(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              item.label,
+              style: _jakarta(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -584,15 +591,16 @@ class _DotarMenuState extends State<DotarMenu>
             ),
           ),
           const SizedBox(width: 16),
-          Text(
-            modeSwitch.label,
-            style: _jakarta(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              modeSwitch.label,
+              style: _jakarta(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const Spacer(),
           SizedBox(
             height: 28,
             child: Switch(
