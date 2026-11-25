@@ -6,6 +6,8 @@ DEAM-Resto's menu (`frontendV2`, `HomeShell` and `AnimatedDrawerContent`) is the
 
 ## Install
 
+Integrating it into an existing app, step by step (private access in CI and Docker included): [docs/INTEGRATION.md](docs/INTEGRATION.md).
+
 The package is private: add it as a git dependency.
 
 ```yaml
