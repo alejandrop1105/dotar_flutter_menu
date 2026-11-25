@@ -6,9 +6,9 @@ DEAM-Resto's menu (`frontendV2`, `HomeShell` and `AnimatedDrawerContent`) is the
 
 ## Install
 
-Integrating it into an existing app, step by step (private access in CI and Docker included): [docs/INTEGRATION.md](docs/INTEGRATION.md).
+Integrating it into an existing app, step by step: [docs/INTEGRATION.md](docs/INTEGRATION.md).
 
-The package is private: add it as a git dependency.
+The repository is public and the package is not on pub.dev: add it as a git dependency. `flutter pub get` needs no GitHub credentials, in CI and Docker too.
 
 ```yaml
 dependencies:
@@ -121,3 +121,7 @@ flutter pub get
 flutter analyze
 flutter test
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE). The bundled Plus Jakarta Sans fonts keep their own license, the SIL Open Font License ([fonts/OFL.txt](fonts/OFL.txt)).

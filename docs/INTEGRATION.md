@@ -5,7 +5,7 @@ A step-by-step guide for a Dotar Flutter app (or the agent working on it) that w
 ## 0. Before you start
 
 - **Toolchain:** Dart `^3.11.0`, Flutter `>=3.41.0`. Check with `flutter --version`.
-- **Access:** the repository is **private**. Every machine and every CI or Docker build that runs `flutter pub get` needs read access to `github.com/alejandrop1105/dotar_flutter_menu` (see step 5). Ask the owner for access if `git ls-remote https://github.com/alejandrop1105/dotar_flutter_menu.git` fails.
+- **Access:** the repository is public: `flutter pub get` fetches it with no GitHub credentials, on any machine and in any CI or Docker build.
 - **Questions:** the package is registered in Nexus as `dotar-flutter-menu`. Send a message there instead of guessing:
 
   ```sh
@@ -111,26 +111,11 @@ Rules worth knowing:
 
    If the app has its own back dispatcher, check `_menu.isOpen` there and call `_menu.close()` instead.
 
-## 5. Make CI and Docker builds reach the private repo
+## 5. CI and Docker builds
 
-`flutter pub get` clones the package with the system `git`, so the build needs GitHub credentials.
+Nothing to set up: the repository is public, so `flutter pub get` clones it with the system `git` and no credentials, in GitHub Actions, Docker or Coolify alike.
 
-- **Developer machine:** `gh auth login` and then `gh auth setup-git` once.
-- **GitHub Actions:** a fine-grained token with *Contents: read* on this repository, stored as a secret, before `pub get`:
-
-  ```sh
-  git config --global url."https://x-access-token:${DOTAR_MENU_TOKEN}@github.com/".insteadOf "https://github.com/"
-  ```
-
-- **Docker / Coolify:** pass the token as a BuildKit secret, never as a build `ARG` or `ENV` (both stay in the image history). Setting the rewrite through `GIT_CONFIG_*` variables of that one `RUN` writes nothing to disk:
-
-  ```dockerfile
-  RUN --mount=type=secret,id=dotar_menu_token \
-      GIT_CONFIG_COUNT=1 \
-      GIT_CONFIG_KEY_0="url.https://x-access-token:$(cat /run/secrets/dotar_menu_token)@github.com/.insteadOf" \
-      GIT_CONFIG_VALUE_0="https://github.com/" \
-      flutter pub get
-  ```
+An app that integrated the package while it was private can drop that setup: the `DOTAR_MENU_TOKEN` secret and the `git config ... insteadOf` step in Actions, and the `--mount=type=secret,id=dotar_menu_token` and `GIT_CONFIG_*` lines in its Dockerfile.
 
 ## 6. Check it
 
@@ -144,4 +129,4 @@ Rules worth knowing:
 
 ## Updating
 
-New versions are published as tags (`v0.2.0`, ...). Read `CHANGELOG.md`, change `ref`, run `flutter pub upgrade dotar_flutter_menu`, and repeat step 6.
+New versions are published as tags (`v0.2.1`, ...). Read `CHANGELOG.md`, change `ref`, run `flutter pub upgrade dotar_flutter_menu`, and repeat step 6.
