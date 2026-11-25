@@ -19,7 +19,7 @@ dependencies:
   dotar_flutter_menu:
     git:
       url: https://github.com/alejandrop1105/dotar_flutter_menu.git
-      ref: v0.1.0 # always a tag, never a branch
+      ref: v0.2.0 # always a tag, never a branch
 ```
 
 Run `flutter pub get` and commit `pubspec.lock`: it pins the exact commit. The package brings only `url_launcher` and its own font; the app declares no font and no asset for it.
@@ -83,6 +83,8 @@ Rules worth knowing:
 
 - An item's `onTap` runs and then the menu closes by itself: do not call `close()` in it.
 - Use `visible: false` to hide an item by permission or setting instead of building the list conditionally.
+- Mark the current screen's item with `selected: location == '/route'`, computed from the app's router, so the menu highlights where the user is.
+- Group items under a title with `DotarMenuSection(title: 'Sistema', items: [...])`, mixed with loose items; a section with every item hidden disappears, title included.
 - `onLogout` runs after the menu closes; leave it null and there is no logout row.
 - The brand color defaults to the theme's `primaryColor`; pass `brandColor` only if the app's brand differs from its theme.
 - The footer "por Dotar Soluciones SAS" is fixed: it is the company's signature, there is no parameter to change or hide it.

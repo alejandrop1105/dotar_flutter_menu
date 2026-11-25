@@ -50,14 +50,21 @@ class DotarMenuUser {
   }
 }
 
-/// One entry of the menu: [onTap] runs and the menu closes.
+/// What [DotarMenu.items] and [DotarMenu.bottomItems] hold: a
+/// [DotarMenuItem] on its own, or a [DotarMenuSection] of them under a title.
 @immutable
-class DotarMenuItem {
+sealed class DotarMenuEntry {
+  const DotarMenuEntry();
+}
+
+/// One entry of the menu: [onTap] runs and the menu closes.
+class DotarMenuItem extends DotarMenuEntry {
   const DotarMenuItem({
     required this.icon,
     required this.label,
     required this.onTap,
     this.visible = true,
+    this.selected = false,
   });
 
   final IconData icon;
@@ -67,6 +74,20 @@ class DotarMenuItem {
   /// False leaves the item out, and only it (DEAM-Resto #207: the panel hid
   /// Estadísticas and Logs each on its own).
   final bool visible;
+
+  /// True marks the entry of the screen the user is on: it is drawn on a
+  /// brand-tinted background and screen readers announce it as selected. The
+  /// app works it out from its current route.
+  final bool selected;
+}
+
+/// A group of [items] under a [title], among the menu's loose items. A
+/// section whose items are all hidden is left out, title included.
+class DotarMenuSection extends DotarMenuEntry {
+  const DotarMenuSection({required this.title, required this.items});
+
+  final String title;
+  final List<DotarMenuItem> items;
 }
 
 /// The light/dark switch above the bottom items. The app owns the mode: it
@@ -121,11 +142,11 @@ class DotarMenu extends StatefulWidget {
 
   final String logoutLabel;
 
-  /// Under the logout.
-  final List<DotarMenuItem> items;
+  /// Under the logout: items, sections of them, or both mixed.
+  final List<DotarMenuEntry> items;
 
-  /// At the bottom, compact, under [modeSwitch].
-  final List<DotarMenuItem> bottomItems;
+  /// At the bottom, compact, under [modeSwitch]: items, sections, or both.
+  final List<DotarMenuEntry> bottomItems;
 
   /// Null hides the switch.
   final DotarMenuModeSwitch? modeSwitch;
@@ -271,12 +292,10 @@ class _DotarMenuState extends State<DotarMenu>
                     ),
                   ),
                 const SizedBox(height: 50),
-                for (final item in widget.items)
-                  if (item.visible) _buildItem(item),
+                ..._buildEntries(widget.items, brand),
                 const Spacer(),
                 if (modeSwitch != null) _buildModeSwitch(modeSwitch),
-                for (final item in widget.bottomItems)
-                  if (item.visible) _buildItem(item, compact: true),
+                ..._buildEntries(widget.bottomItems, brand, compact: true),
                 const SizedBox(height: 16),
                 // DEAM-Resto #211 (S10): at the bottom, centred, with the
                 // version installed.
@@ -459,31 +478,87 @@ class _DotarMenuState extends State<DotarMenu>
     ];
   }
 
-  /// One entry; the menu closes after its action.
-  Widget _buildItem(DotarMenuItem item, {bool compact = false}) {
-    return InkWell(
-      onTap: () {
-        item.onTap();
-        _close();
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: compact ? 10.0 : 16.0,
-          horizontal: 24.0,
+  /// The visible items of [entries], each section's under its title; a
+  /// section with no visible item draws nothing.
+  List<Widget> _buildEntries(
+    List<DotarMenuEntry> entries,
+    Color brand, {
+    bool compact = false,
+  }) => [
+    for (final entry in entries)
+      if (entry case final DotarMenuItem item when item.visible)
+        _buildItem(item, brand, compact: compact)
+      else if (entry case DotarMenuSection(
+        :final title,
+        :final items,
+      ) when items.any((item) => item.visible)) ...[
+        _buildSectionTitle(title),
+        for (final item in items)
+          if (item.visible) _buildItem(item, brand, compact: compact),
+      ],
+  ];
+
+  /// A section's title, lined up with the items' icons.
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 4),
+      child: Text(
+        title,
+        style: _jakarta(
+          color: Colors.white54,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
-        child: Row(
-          children: [
-            Icon(item.icon, color: Colors.white, size: 28),
-            const SizedBox(width: 16),
-            Text(
-              item.label,
-              style: _jakarta(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+      ),
+    );
+  }
+
+  /// One entry; the menu closes after its action. A selected one sits on a
+  /// brand-tinted background inset 12 px, so its icon and label keep the
+  /// place they have unselected.
+  Widget _buildItem(DotarMenuItem item, Color brand, {bool compact = false}) {
+    Widget content = Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: compact ? 10.0 : 16.0,
+        horizontal: 12.0,
+      ),
+      child: Row(
+        children: [
+          Icon(item.icon, color: Colors.white, size: 28),
+          const SizedBox(width: 16),
+          Text(
+            item.label,
+            style: _jakarta(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+    if (item.selected) {
+      // A DecoratedBox, not a Container: a Container insets its child by the
+      // border's width, and the label would move.
+      content = DecoratedBox(
+        decoration: BoxDecoration(
+          color: brand.withValues(alpha: 0.2),
+          border: Border.all(color: brand.withValues(alpha: 0.6)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: content,
+      );
+    }
+    return Semantics(
+      selected: item.selected,
+      child: InkWell(
+        onTap: () {
+          item.onTap();
+          _close();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: content,
         ),
       ),
     );

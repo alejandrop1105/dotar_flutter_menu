@@ -45,13 +45,243 @@ void main() {
   DotarMenuItem item(
     String label, {
     bool visible = true,
+    bool selected = false,
     VoidCallback? onTap,
   }) => DotarMenuItem(
     icon: Icons.circle,
     label: label,
     onTap: onTap ?? () {},
     visible: visible,
+    selected: selected,
   );
+
+  /// The highlight behind [label]'s item: the decoration of the nearest
+  /// decorated box above its text, null when there is none.
+  BoxDecoration? highlightOf(WidgetTester tester, String label) {
+    final boxes = tester.widgetList<DecoratedBox>(
+      find.ancestor(of: find.text(label), matching: find.byType(DecoratedBox)),
+    );
+    for (final box in boxes) {
+      if (box.decoration case final BoxDecoration decoration) {
+        return decoration;
+      }
+    }
+    return null;
+  }
+
+  group('selected item', () {
+    final theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+    );
+
+    testWidgets('the selected item is highlighted with the brand color, in '
+        'items and in bottomItems, and the others are not', (tester) async {
+      await pumpMenu(
+        tester,
+        DotarMenu(
+          items: [item('Ruta', selected: true), item('Clientes')],
+          bottomItems: [item('Configuración', selected: true), item('Logs')],
+        ),
+        theme: theme,
+      );
+
+      final brand = theme.colorScheme.primary;
+      for (final label in ['Ruta', 'Configuración']) {
+        final highlight = highlightOf(tester, label);
+        expect(highlight, isNotNull, reason: '$label is highlighted');
+        expect(highlight!.color, brand.withValues(alpha: 0.2));
+        expect(highlight.border!.top.color, brand.withValues(alpha: 0.6));
+      }
+      expect(highlightOf(tester, 'Clientes'), isNull);
+      expect(highlightOf(tester, 'Logs'), isNull);
+    });
+
+    testWidgets('the highlight follows brandColor when one is given', (
+      tester,
+    ) async {
+      await pumpMenu(
+        tester,
+        DotarMenu(
+          items: [item('Ruta', selected: true)],
+          brandColor: const Color(0xFFF06D42),
+        ),
+        theme: theme,
+      );
+
+      expect(
+        highlightOf(tester, 'Ruta')!.color,
+        const Color(0xFFF06D42).withValues(alpha: 0.2),
+      );
+    });
+
+    testWidgets('screen readers hear which item is selected', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpMenu(
+        tester,
+        DotarMenu(
+          items: [item('Ruta', selected: true), item('Clientes')],
+          bottomItems: [item('Configuración', selected: true)],
+        ),
+      );
+
+      expect(
+        tester.getSemantics(find.text('Ruta')),
+        isSemantics(label: 'Ruta', isSelected: true),
+      );
+      expect(
+        tester.getSemantics(find.text('Configuración')),
+        isSemantics(label: 'Configuración', isSelected: true),
+      );
+      expect(
+        tester.getSemantics(find.text('Clientes')),
+        isSemantics(label: 'Clientes', isSelected: false),
+      );
+      semantics.dispose();
+    });
+
+    testWidgets('selecting an item moves neither its icon nor its label', (
+      tester,
+    ) async {
+      await pumpMenu(
+        tester,
+        DotarMenu(items: [item('Ruta', selected: true), item('Clientes')]),
+      );
+
+      final selected = tester.getRect(find.text('Ruta'));
+      final plain = tester.getRect(find.text('Clientes'));
+      // 24 px of padding, a 28 px icon and 16 px to the label, as in 0.1.0.
+      expect(plain.left, 24 + 28 + 16);
+      expect(selected.left, plain.left);
+      expect(selected.height, plain.height);
+    });
+
+    testWidgets('a selected item still runs its action and closes the menu', (
+      tester,
+    ) async {
+      var tapped = 0;
+      await pumpMenu(
+        tester,
+        DotarMenu(items: [item('Ruta', selected: true, onTap: () => tapped++)]),
+      );
+
+      await tester.tap(find.text('Ruta'));
+      await tester.pump();
+
+      expect(tapped, 1);
+      expect(controller.isOpen, isFalse);
+    });
+  });
+
+  group('sections', () {
+    testWidgets(
+      'a section shows its title above its items, among loose items',
+      (tester) async {
+        await pumpMenu(
+          tester,
+          DotarMenu(
+            items: [
+              item('Inicio'),
+              DotarMenuSection(title: 'Operación', items: [item('Ruta')]),
+              DotarMenuSection(
+                title: 'Sistema',
+                items: [item('Sincronización'), item('Notificaciones')],
+              ),
+            ],
+            bottomItems: [
+              DotarMenuSection(title: 'Ayuda', items: [item('Soporte')]),
+            ],
+          ),
+        );
+
+        double top(String text) => tester.getRect(find.text(text)).top;
+        const order = [
+          'Inicio',
+          'Operación',
+          'Ruta',
+          'Sistema',
+          'Sincronización',
+          'Notificaciones',
+        ];
+        for (var i = 1; i < order.length; i++) {
+          expect(
+            top(order[i]),
+            greaterThan(top(order[i - 1])),
+            reason: '${order[i]} is below ${order[i - 1]}',
+          );
+        }
+        expect(top('Ayuda'), lessThan(top('Soporte')));
+        // The title lines up with the items' icons.
+        expect(tester.getRect(find.text('Operación')).left, 24);
+      },
+    );
+
+    testWidgets(
+      'a section runs its items and closes the menu like loose ones',
+      (tester) async {
+        var tapped = 0;
+        await pumpMenu(
+          tester,
+          DotarMenu(
+            items: [
+              DotarMenuSection(
+                title: 'Operación',
+                items: [item('Ruta', onTap: () => tapped++)],
+              ),
+            ],
+          ),
+        );
+
+        await tester.tap(find.text('Ruta'));
+        await tester.pump();
+
+        expect(tapped, 1);
+        expect(controller.isOpen, isFalse);
+      },
+    );
+
+    testWidgets('a section whose items are all hidden shows no title, and a '
+        'section hides only its hidden items', (tester) async {
+      await pumpMenu(
+        tester,
+        DotarMenu(
+          items: [
+            DotarMenuSection(
+              title: 'Operación',
+              items: [item('Ruta', visible: false)],
+            ),
+            DotarMenuSection(
+              title: 'Sistema',
+              items: [item('Sincronización', visible: false), item('Logs')],
+            ),
+          ],
+          bottomItems: [
+            DotarMenuSection(
+              title: 'Ayuda',
+              items: [item('Soporte', visible: false)],
+            ),
+          ],
+        ),
+      );
+
+      expect(find.text('Operación'), findsNothing);
+      expect(find.text('Ruta'), findsNothing);
+      expect(find.text('Ayuda'), findsNothing);
+      expect(find.text('Sistema'), findsOneWidget);
+      expect(find.text('Sincronización'), findsNothing);
+      expect(find.text('Logs'), findsOneWidget);
+    });
+
+    testWidgets('a list typed as items, as 0.1.0 took it, still works', (
+      tester,
+    ) async {
+      final List<DotarMenuItem> items = [item('Dashboard')];
+      final List<DotarMenuItem> bottomItems = [item('Servidor')];
+      await pumpMenu(tester, DotarMenu(items: items, bottomItems: bottomItems));
+
+      expect(find.text('Dashboard'), findsOneWidget);
+      expect(find.text('Servidor'), findsOneWidget);
+    });
+  });
 
   group('items', () {
     testWidgets('an item runs its action and then closes the menu', (

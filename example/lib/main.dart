@@ -82,21 +82,30 @@ class _HomePageState extends State<HomePage> {
             subtitle: 'Usuario / Administrador',
           ),
           onLogout: () => _show('Sesión cerrada'),
+          // The current page's item is selected; loose items and sections mix.
           items: [
             DotarMenuItem(
               icon: Icons.dashboard_rounded,
               label: 'Inicio',
               onTap: () => _show('Inicio'),
+              selected: _page == 'Inicio',
             ),
-            DotarMenuItem(
-              icon: Icons.bar_chart_rounded,
-              label: 'Estadísticas',
-              onTap: () => _show('Estadísticas'),
-            ),
-            DotarMenuItem(
-              icon: Icons.sync_rounded,
-              label: 'Sincronizar',
-              onTap: () => _show('Sincronizar'),
+            DotarMenuSection(
+              title: 'Operación',
+              items: [
+                DotarMenuItem(
+                  icon: Icons.bar_chart_rounded,
+                  label: 'Estadísticas',
+                  onTap: () => _show('Estadísticas'),
+                  selected: _page == 'Estadísticas',
+                ),
+                DotarMenuItem(
+                  icon: Icons.sync_rounded,
+                  label: 'Sincronizar',
+                  onTap: () => _show('Sincronizar'),
+                  selected: _page == 'Sincronizar',
+                ),
+              ],
             ),
           ],
           bottomItems: [

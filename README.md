@@ -15,7 +15,7 @@ dependencies:
   dotar_flutter_menu:
     git:
       url: https://github.com/alejandrop1105/dotar_flutter_menu.git
-      ref: v0.1.0
+      ref: v0.2.0
 ```
 
 It depends only on Flutter and `url_launcher`, and bundles Plus Jakarta Sans (SIL Open Font License, `fonts/OFL.txt`), so the menu looks the same offline and an app declares no font for it.
@@ -54,6 +54,34 @@ DotarMenuShell(
 
 - **Opening and closing.** Anything under the shell reaches the controller with `DotarMenuController.of(context)`: a hamburger button calls `toggle()`. `open()` and `close()` do nothing when the menu already is open or closed, so closing twice never reopens it.
 - **Items.** An item runs its `onTap` and then closes the menu; `visible: false` leaves it out. `bottomItems` are drawn compact at the bottom, under the mode switch.
+- **Selected item.** `selected: true` marks the entry of the screen the user is on: it sits on a `brandColor`-tinted background and screen readers announce it as selected; its icon and label do not move. The app works it out from its route, in `items` and in `bottomItems` alike:
+
+  ```dart
+  DotarMenuItem(
+    icon: Icons.route_rounded,
+    label: 'Ruta',
+    onTap: () => go('/route'),
+    selected: location == '/route',
+  )
+  ```
+
+- **Sections.** A `DotarMenuSection` groups items under a title, among loose items, in `items` or `bottomItems`. A section whose items are all hidden is left out, title included:
+
+  ```dart
+  items: [
+    DotarMenuItem(icon: Icons.dashboard_rounded, label: 'Inicio', onTap: () => go('/')),
+    DotarMenuSection(title: 'Operación', items: [
+      DotarMenuItem(icon: Icons.route_rounded, label: 'Ruta', onTap: () => go('/route')),
+    ]),
+    DotarMenuSection(title: 'Sistema', items: [
+      DotarMenuItem(icon: Icons.sync_rounded, label: 'Sincronización', onTap: () => go('/sync')),
+      DotarMenuItem(icon: Icons.notifications_rounded, label: 'Notificaciones', onTap: () => go('/notifications')),
+      DotarMenuItem(icon: Icons.settings_rounded, label: 'Configuración', onTap: () => go('/settings')),
+    ]),
+  ],
+  ```
+
+  `items` and `bottomItems` take `DotarMenuEntry`, which a `DotarMenuItem` and a `DotarMenuSection` both are, so a plain list of items, as 0.1.0 took it, still works unchanged.
 - **Logout.** `onLogout` runs after the menu closes; without it there is no logout. Its label is `logoutLabel`, "Cerrar Sesión" by default.
 - **Header.** `header` is drawn centred at the top with 16 px above and below; without it the menu keeps a 50 px gap.
 - **User.** The name shows whole, over as many lines as it needs. Without `avatarUrl` the avatar shows the initials of the first and the last word of the name.

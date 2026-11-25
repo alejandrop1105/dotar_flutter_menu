@@ -2,7 +2,7 @@ name: dotar_flutter_menu
 description: >-
   Dotar Soluciones' animated side menu, the company's signature in its Flutter
   apps: the app slides and tilts aside to show the menu behind it.
-version: 0.1.0
+version: 0.2.0
 publish_to: none
 repository: https://github.com/alejandrop1105/dotar_flutter_menu
 
