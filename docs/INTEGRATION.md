@@ -19,7 +19,7 @@ dependencies:
   dotar_flutter_menu:
     git:
       url: https://github.com/alejandrop1105/dotar_flutter_menu.git
-      ref: v0.2.1 # always a tag, never a branch
+      ref: v0.2.2 # always a tag, never a branch
 ```
 
 Run `flutter pub get` and commit `pubspec.lock`: it pins the exact commit. The package brings only `url_launcher` and its own font; the app declares no font and no asset for it.
@@ -43,7 +43,7 @@ class _HomeShellState extends State<HomeShell> {
 
 ## 3. Wrap the app's main screen
 
-`DotarMenuShell` goes **around** the screen the menu belongs to, so the whole screen slides aside. Put it above the `Scaffold`, below `MaterialApp`/the router:
+`DotarMenuShell` goes **around** the screen the menu belongs to, so the whole screen slides aside. Put it above the `Scaffold`, below `MaterialApp`/the router. The shell has no `Scaffold` of its own: each screen inside it needs one to show SnackBars.
 
 ```dart
 @override
@@ -86,7 +86,7 @@ Rules worth knowing:
 - Mark the current screen's item with `selected: location == '/route'`, computed from the app's router, so the menu highlights where the user is.
 - Group items under a title with `DotarMenuSection(title: 'Sistema', items: [...])`, mixed with loose items; a section with every item hidden disappears, title included.
 - `onLogout` runs after the menu closes; leave it null and there is no logout row.
-- The brand color defaults to the theme's `primaryColor`; pass `brandColor` only if the app's brand differs from its theme.
+- The brand color defaults to the theme's `colorScheme.primary`; pass `brandColor` only if the app's brand differs from its theme.
 - The footer "por Dotar Soluciones SAS" is fixed: it is the company's signature, there is no parameter to change or hide it.
 
 ## 4. Remove the old menu and handle back
@@ -119,7 +119,7 @@ An app that integrated the package while it was private can drop that setup: the
 
 ## 6. Check it
 
-- `flutter analyze` and `flutter test` pass.
+- `flutter analyze` and `flutter test` pass. In widget tests, the open menu's background animation never ends, so `pumpAndSettle` times out: use `await tester.pump(); await tester.pump(const Duration(seconds: 1));` instead.
 - Run the app: the hamburger opens the menu, the app slides right and tilts, a tap on the app closes it.
 - Each item navigates and closes the menu; hidden items do not show.
 - Logout closes the menu and then logs out.
@@ -129,4 +129,4 @@ An app that integrated the package while it was private can drop that setup: the
 
 ## Updating
 
-New versions are published as tags (`v0.2.1`, ...). Read `CHANGELOG.md`, change `ref`, run `flutter pub upgrade dotar_flutter_menu`, and repeat step 6.
+New versions are published as tags (`v0.2.2`, ...). Read `CHANGELOG.md`, change `ref`, run `flutter pub upgrade dotar_flutter_menu`, and repeat step 6.

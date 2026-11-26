@@ -199,4 +199,83 @@ void main() {
     expect(controller.isOpen, isFalse);
     expect(appTransform(), findsNothing);
   });
+
+  // A real app's child: its own Navigator, with a Scaffold that has a bottom
+  // bar (InvoiceLens, v0.2.1).
+  group('with an app that has its own Navigator and bottom bar', () {
+    const barKey = Key('bar');
+    late int barTaps;
+
+    Future<void> pumpApp(WidgetTester tester) async {
+      barTaps = 0;
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DotarMenuShell(
+            controller: controller,
+            menu: DotarMenu(
+              items: [
+                DotarMenuItem(
+                  icon: Icons.home_rounded,
+                  label: 'Inicio',
+                  selected: true,
+                  onTap: () {},
+                ),
+              ],
+            ),
+            child: Navigator(
+              onGenerateRoute: (_) => MaterialPageRoute<void>(
+                builder: (context) => Scaffold(
+                  bottomNavigationBar: SizedBox(
+                    key: barKey,
+                    height: 60,
+                    child: InkWell(onTap: () => barTaps++),
+                  ),
+                  body: Center(
+                    child: TextButton(
+                      onPressed: () => ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text('saved'))),
+                      child: const Text('save'),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets("the app's SnackBar sits above its bottom bar, and the bar "
+        'still takes taps', (tester) async {
+      await pumpApp(tester);
+
+      await tester.tap(find.text('save'));
+      await settle(tester);
+
+      expect(find.text('saved'), findsOneWidget);
+      expect(
+        tester.getRect(find.byType(SnackBar)).bottom,
+        lessThanOrEqualTo(tester.getRect(find.byKey(barKey)).top),
+      );
+      await tester.tap(find.byKey(barKey));
+      expect(barTaps, 1);
+    });
+
+    testWidgets('screen readers hear the open menu', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpApp(tester);
+
+      controller.open();
+      await settle(tester);
+
+      expect(
+        tester.getSemantics(find.text('Inicio')),
+        isSemantics(label: 'Inicio', isSelected: true),
+      );
+      semantics.dispose();
+    });
+  });
 }

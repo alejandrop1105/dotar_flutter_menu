@@ -32,7 +32,8 @@ class DotarMenuShell extends StatefulWidget {
   /// is open or moving.
   final Widget menu;
 
-  /// The app, usually a [Scaffold]: it paints its own background.
+  /// The app, usually a [Scaffold]: it paints its own background and shows
+  /// its own SnackBars, since the shell has no Scaffold.
   final Widget child;
 
   final Duration duration;
@@ -126,9 +127,12 @@ class _DotarMenuShellState extends State<DotarMenuShell>
     final isOpen = widget.controller.isOpen;
     return DotarMenuScope(
       controller: widget.controller,
-      child: Scaffold(
-        backgroundColor: widget.backgroundColor,
-        body: Stack(
+      // A Material, not a Scaffold: the app's own Scaffold has to be the
+      // outermost one, or the ScaffoldMessenger shows its SnackBars on the
+      // shell's, over the app's bottom bar.
+      child: Material(
+        color: widget.backgroundColor,
+        child: Stack(
           children: [
             // The menu behind, hidden while the menu is closed.
             Visibility(
@@ -183,7 +187,12 @@ class _DotarMenuShellState extends State<DotarMenuShell>
               },
               child: GestureDetector(
                 onTap: isOpen ? widget.controller.close : null,
-                child: AbsorbPointer(absorbing: isOpen, child: widget.child),
+                child: AbsorbPointer(
+                  absorbing: isOpen,
+                  // A container stops the BlockSemantics of the app's route
+                  // barriers here, before it drops the menu painted below.
+                  child: Semantics(container: true, child: widget.child),
+                ),
               ),
             ),
           ],

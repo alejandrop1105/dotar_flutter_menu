@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- An app's SnackBars sit above its own bottom bar again: the shell paints its background with a `Material` instead of a `Scaffold`, so the app's `Scaffold` is the one the `ScaffoldMessenger` shows them on. A screen inside the shell needs its own `Scaffold` to show SnackBars or to call `Scaffold.of`.
+- Screen readers hear the open menu when the app has its own `Navigator`: the app sits in a semantics container, so its routes' barriers no longer drop the menu's semantics.
+- Reported and fixed by InvoiceLens. No API change.
+
 ## 0.2.1
 
 - An item's label, the logout's and the mode switch's no longer overflow the 240 px column: one longer than the column holds goes on to a second line and reads whole. Labels that fit look as in 0.2.0. No API change.

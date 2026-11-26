@@ -15,7 +15,7 @@ dependencies:
   dotar_flutter_menu:
     git:
       url: https://github.com/alejandrop1105/dotar_flutter_menu.git
-      ref: v0.2.1
+      ref: v0.2.2
 ```
 
 It depends only on Flutter and `url_launcher`, and bundles Plus Jakarta Sans (SIL Open Font License, `fonts/OFL.txt`), so the menu looks the same offline and an app declares no font for it.
